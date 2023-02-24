@@ -1,6 +1,7 @@
 package renderer
 
 import (
+	"encoding/json"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -31,4 +32,14 @@ func (r *Renderer) RenderView(viewPath string) {
 	}
 
 	io.WriteString(*r.responseWriter, resultString)
+}
+
+func (r *Renderer) RenderJSON(responseMap any) {
+	response, err := json.Marshal(responseMap)
+
+	if err != nil {
+		panic(err)
+	}
+
+	io.WriteString(*r.responseWriter, string(response))
 }

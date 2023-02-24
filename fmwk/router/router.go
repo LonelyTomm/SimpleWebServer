@@ -8,7 +8,10 @@ type Router struct {
 
 func NewRouter() Router {
 	return Router{
-		routeMap: map[string]interface{}{"/": controllers.HelloWorld},
+		routeMap: map[string]interface{}{
+			"/":         controllers.HelloWorld,
+			"/testJson": controllers.TestJson,
+		},
 	}
 }
 
