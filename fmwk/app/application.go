@@ -1,65 +1,31 @@
 package app
 
 import (
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
-	"reflect"
-	"web/serv/fmwk/controllers"
+	"web/serv/fmwk/renderer"
+	"web/serv/fmwk/router"
 )
 
 type Application struct {
-	renderer Renderer
+	renderer       renderer.Renderer
+	router         router.Router
+	ResponseWriter *http.ResponseWriter
+	Request        *http.Request
 }
 
-var controllerMap = map[string]interface{}{
-	"/": controllers.Test}
-
-type Handler struct{}
-
-func (h *Handler) ServeHTTP(w http.ResponseWriter, req *http.Request) {
-	defaultWebFolderPath := "/home/galv/goprj/myserv/web"
-	fmt.Println(req.URL.Path)
-
-	if _, err := os.Stat(defaultWebFolderPath + req.URL.Path); err == nil && req.URL.Path != "/" {
-		fileBytes, err := ioutil.ReadFile(defaultWebFolderPath + req.URL.Path)
-		if err != nil {
-			panic(err)
-		}
-		w.WriteHeader(http.StatusOK)
-		w.Header().Set("Content-Type", "application/octet-stream")
-		w.Write(fileBytes)
-		return
-	}
-
-	controllerAction, ok := controllerMap[req.URL.Path]
-
-	if ok {
-		app := NewApplication()
-		in := []reflect.Value{reflect.ValueOf(w), reflect.ValueOf(req), reflect.ValueOf(&app)}
-		reflect.ValueOf(controllerAction).Call(in)
-		return
-	}
-
-	w.WriteHeader(http.StatusNotFound)
-}
-
-func NewApplication() Application {
+func NewApplication(request *http.Request, responseWriter *http.ResponseWriter) Application {
 	return Application{
-		renderer: Renderer{},
+		renderer:       renderer.NewRenderer(responseWriter),
+		router:         router.NewRouter(),
+		ResponseWriter: responseWriter,
+		Request:        request,
 	}
 }
 
-func (app Application) StartListening() {
-
-	err := http.ListenAndServe("127.0.0.1:8080", &Handler{})
-
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-}
-
-func (app *Application) GetRenderer() *Renderer {
+func (app *Application) GetRenderer() *renderer.Renderer {
 	return &app.renderer
+}
+
+func (app *Application) GetRouter() *router.Router {
+	return &app.router
 }

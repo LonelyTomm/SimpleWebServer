@@ -1,9 +1,7 @@
 package controllers
 
-type Renderer interface {
-	RenderView(viewPath string) string
-}
+import "web/serv/fmwk/renderer"
 
 type Application interface {
-	GetRenderer() interface{}
+	GetRenderer() *renderer.Renderer
 }
